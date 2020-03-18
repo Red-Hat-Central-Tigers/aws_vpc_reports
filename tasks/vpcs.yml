@@ -1,0 +1,19 @@
+- name: "{{ ec2_region }} - {{ vpc.vpc_id }} - Get ec2 instance information"
+  ec2_instance_facts:
+    region: "{{ ec2_region }}"
+    filters:
+      vpc-id: "{{ vpc.vpc_id }}"
+  register: ec2_instances
+
+- name: "{{ ec2_region }} - {{ vpc.vpc_id }} - Get running ec2 instance information"
+  ec2_instance_facts:
+    region: "{{ ec2_region }}"
+    filters:
+      vpc-id: "{{ vpc.vpc_id }}"
+      instance-state-name: running
+  register: ec2_instances_running
+
+- name: "{{ ec2_region }} - {{ vpc.vpc_id }} - Render the VPC Template"
+  template: 
+    src: "templates/report.csv.j2" 
+    dest: "{{ playbook_dir }}/reports/fragments/{{ vpc.vpc_id }}.csv"

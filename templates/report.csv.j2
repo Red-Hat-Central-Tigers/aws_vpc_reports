@@ -1,0 +1,1 @@
+{{ vpc.vpc_id }},{{ vpc.tags.Name | default('') }},{{ vpc.tags.Username | default('') }},{{ vpc.tags.Students | default('') }},{{ ec2_instances_running.instances | length }},{{ ec2_instances.instances | length }},{{ (ec2_instances.instances|last).key_name | default('') }},{{ (ec2_instances.instances|last).launch_time | default('') }}

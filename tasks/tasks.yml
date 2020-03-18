@@ -1,0 +1,32 @@
+- name: "{{ ec2_region }} - Remove the fragments directory to clean it out"
+  file:
+     state: absent
+     path: "{{ playbook_dir }}/reports/fragments/"
+
+- name: "{{ ec2_region }} - Recreate the fragments directory"
+  file:
+     state: directory
+     path: "{{ playbook_dir }}/reports/fragments/"
+
+- name: "{{ ec2_region }} - Get VPCs"
+  ec2_vpc_net_facts:
+    region: "{{ ec2_region }}"
+  register: vpcs
+
+- include_tasks: tasks/vpcs.yml
+  with_items: "{{ vpcs.vpcs }}"
+  loop_control:
+    loop_var: vpc
+
+- name: "{{ ec2_region }} - Concat all the csv files"
+  assemble: 
+    src: "{{ playbook_dir }}/reports/fragments/"
+    dest: "{{ playbook_dir }}/reports/{{ ec2_region }}.csv"
+  run_once: true 
+
+- name: "{{ ec2_region }} - Append the header to the csv file"
+  lineinfile: 
+    dest: "{{ playbook_dir }}/reports/{{ ec2_region }}.csv"
+    insertbefore: BOF 
+    line: "VPC,Name,Username,Students,Running,Total,Key Name,Launched" 
+  run_once: true
