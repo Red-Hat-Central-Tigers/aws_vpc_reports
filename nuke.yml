@@ -1,7 +1,7 @@
 ---
 - name: Generate Reports for AWS VPCs
   hosts: localhost
-  gather_facts: no
+  gather_facts: yes
   vars:
     ec2_regions:
        - "us-east-1"          # N Virginia
@@ -17,7 +17,7 @@
        - "eu-west-2"          # London
 
   tasks:
-    - include_tasks: tasks/report/tasks.yml
+    - include_tasks: tasks/nuke/tasks.yml
       with_items: "{{ ec2_regions }}"
       loop_control:
         loop_var: ec2_region

@@ -1,12 +1,12 @@
 - name: "{{ ec2_region }} - {{ vpc.vpc_id }} - Get ec2 instance information"
-  ec2_instance_facts:
+  ec2_instance_info:
     region: "{{ ec2_region }}"
     filters:
       vpc-id: "{{ vpc.vpc_id }}"
   register: ec2_instances
 
 - name: "{{ ec2_region }} - {{ vpc.vpc_id }} - Get running ec2 instance information"
-  ec2_instance_facts:
+  ec2_instance_info:
     region: "{{ ec2_region }}"
     filters:
       vpc-id: "{{ vpc.vpc_id }}"

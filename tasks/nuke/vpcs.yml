@@ -1,0 +1,18 @@
+- name: "{{ ec2_region }} - {{ vpc.vpc_id }} - Get ec2 instance information"
+  ec2_instance_info:
+    region: "{{ ec2_region }}"
+    filters:
+      vpc-id: "{{ vpc.vpc_id }}"
+  register: ec2_instances
+
+- debug:
+    msg: "Days since Launch: {{ (('%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days }}"
+
+- include_tasks: tasks/nuke/teardown.yml
+  when: (('%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days > 2
+  vars:
+    ec2_name_prefix: "{{ (ec2_instances.instances | first).tags.Workshop }}"
+    workshop_type: "{{ (ec2_instances.instances | first).tags.workshop_type }}"
+    student_total: "{{ (ec2_instances.instances | first).tags.Students }}"
+
+    

@@ -1,0 +1,12 @@
+- name: "{{ ec2_region }} - Get GPTE VPCs"
+  ec2_vpc_net_info:
+    region: "{{ ec2_region }}"
+    filters:
+      "tag:Username": GPTE
+  register: vpcs
+
+- include_tasks: tasks/nuke/vpcs.yml
+  with_items: "{{ vpcs.vpcs }}"
+  loop_control:
+    loop_var: vpc
+
