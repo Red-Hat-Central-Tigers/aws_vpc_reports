@@ -6,13 +6,16 @@
   register: ec2_instances
 
 - debug:
-    msg: "Days since Launch: {{ (('%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days }}"
+    msg: "Days since Launch: {{ (((ansible_date_time.iso8601 | replace('T', ' '))[0:19] | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days }}"
 
 - include_tasks: tasks/nuke/teardown.yml
-  when: (('%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days > 2
+  when: (((ansible_date_time.iso8601 | replace('T', ' '))[0:19] | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days > 2
   vars:
     ec2_name_prefix: "{{ (ec2_instances.instances | first).tags.Workshop }}"
-    workshop_type: "{{ (ec2_instances.instances | first).tags.workshop_type }}"
+    workshop_type: "{{ (ec2_instances.instances | first).tags.Workshop_type }}"
     student_total: "{{ (ec2_instances.instances | first).tags.Students }}"
+    ec2_az: "{{ ec2_region }}a"
+    ec2_subnet: "172.16.0.0/16"
+    ec2_subnet2: "172.17.0.0/16"
 
     
