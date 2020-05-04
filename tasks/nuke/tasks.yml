@@ -5,8 +5,17 @@
       "tag:Username": GPTE
   register: vpcs
 
+- name: "{{ ec2_region }} - Get Gating VPCs"
+  ec2_vpc_net_info:
+    region: "{{ ec2_region }}"
+    filters:
+      "tag:Name":  tqe-gating-*-vpc
+  register: vpcs2
+
 - include_tasks: tasks/nuke/vpcs.yml
-  with_items: "{{ vpcs.vpcs }}"
+  with_items: 
+    - "{{ vpcs.vpcs }}"
+    - "{{ vpcs2.vpcs }}"
   loop_control:
     loop_var: vpc
 

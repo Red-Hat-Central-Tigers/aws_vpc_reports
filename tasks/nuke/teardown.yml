@@ -1,4 +1,11 @@
 ---
+- debug:
+    msg: |
+         TEARING DOWN
+         NAME: {{ ec2_name_prefix }}
+         TYPE: {{ workshop_type }}
+         STUDENTS: {{ student_total }}
+
 - name: Get the VPC ID for {{ ec2_name_prefix }}
   ec2_vpc_net_info:
     filters:
