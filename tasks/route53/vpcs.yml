@@ -1,0 +1,12 @@
+
+
+- name: "{{ ec2_region }} - Get VPCs"
+  ec2_vpc_net_info:
+    region: "{{ ec2_region }}"
+  register: vpcs
+
+- name: "{{ ec2_region }} -  Render the VPCS Template"
+  template: 
+    src: "templates/route53.csv.j2" 
+    dest: "{{ playbook_dir }}/reports/fragments-vpcs/{{ ec2_region }}.csv"
+

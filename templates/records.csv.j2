@@ -1,0 +1,3 @@
+{% for r in all_records | sort(attribute='Name') %}{% if r.Type is defined and r.Type == "A" and r.Name.split('.') | length > 3 %}
+{{ r.Name.rstrip('.') }}
+{% endif %}{% endfor %}

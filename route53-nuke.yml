@@ -1,0 +1,34 @@
+---
+- name: Generate Reports for AWS VPCs
+  hosts: localhost
+  gather_facts: no
+
+
+  tasks:
+    - name: GRAB ZONE ID
+      route53_zone:
+        zone: "rhdemo.io"
+      register: AWSINFO
+
+    - set_fact:
+        vpcs: "{{ lookup('file', 'reports/vpcs.txt').splitlines() }}"
+        routes: "{{ lookup('file', 'reports/route53-records.txt').splitlines() }}"
+
+    - debug:
+        var: routes | length
+
+    - set_fact:
+        delete: "{% set output = [] %}{% for r in routes %}{% if r.split('.')[(r.split('.')|length)-3] not in vpcs %}{{ output.append(r) }}{% endif %}{% endfor %}{{ output }}"
+#        save: "{% set output = [] %}{% for r in routes %}{% if r.split('.')[(r.split('.')|length)-3] in vpcs %}{{ output.append(r) }}{% endif %}{% endfor %}{{ output }}"
+        zone_id: "{{ AWSINFO.zone_id }}"
+
+
+    - debug:
+        var: delete | length
+
+
+    - include_tasks: tasks/route53/nuke.yml
+      with_items: "{{ delete }}"
+      loop_control:
+        loop_var: record
+

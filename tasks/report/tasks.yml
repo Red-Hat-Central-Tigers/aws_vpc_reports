@@ -28,5 +28,5 @@
   lineinfile: 
     dest: "{{ playbook_dir }}/reports/{{ ec2_region }}.csv"
     insertbefore: BOF 
-    line: "VPC,Name,Username,Students,Running,Total,Key Name,Launched" 
+    line: "VPC,Name,Username,WName,Type,Students,Running,Total,Key Name,Launched" 
   run_once: true

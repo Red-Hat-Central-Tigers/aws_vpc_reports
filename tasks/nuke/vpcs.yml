@@ -7,16 +7,21 @@
 
 - block:
   - debug:
+      var: vpc
+
+  - debug:
       msg: "Days since Launch: {{ (((ansible_date_time.iso8601 | replace('T', ' '))[0:19] | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days }}"
 
   - include_tasks: tasks/nuke/teardown.yml
     when: 
       - (((ansible_date_time.iso8601 | replace('T', ' '))[0:19] | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).days > 2
-      - ((ec2_instances.instances | first).tags.Workshop_type) is defined
+      - ((ec2_instances.instances | last).tags.Workshop_type) is defined
       - (ec2_instances.instances | first).tags.AWS_USERNAME == "GPTE" 
+      - vpc.tags.Name.endswith('-vpc') 
+
     vars:
       ec2_name_prefix: "{{ (ec2_instances.instances | first).tags.Workshop }}"
-      workshop_type: "{{ (ec2_instances.instances | first).tags.Workshop_type }}"
+      workshop_type: "{{ (ec2_instances.instances | last).tags.Workshop_type }}"
       student_total: "{{ (ec2_instances.instances | first).tags.Students }}"
       ec2_az: "{{ ec2_region }}a"
       ec2_subnet: "172.16.0.0/16"
@@ -24,6 +29,7 @@
       ec2_vpc_id: "{{ vpc.vpc_id }}"
 
   when:
+    - (ec2_instances.instances | first).tags.AWS_USERNAME is defined
     - (ec2_instances.instances | first).tags.AWS_USERNAME == "GPTE" 
   any_errors_fatal: false
 
@@ -34,10 +40,10 @@
   - include_tasks: tasks/nuke/teardown.yml
     when: 
       - (((ansible_date_time.iso8601 | replace('T', ' '))[0:19] | to_datetime) - (((ec2_instances.instances | first).launch_time | replace('T', ' '))[0:19] | to_datetime)).seconds > 21600
-      - ((ec2_instances.instances | first).tags.Workshop_type) is defined
+      - ((ec2_instances.instances | last).tags.Workshop_type) is defined
     vars:
       ec2_name_prefix: "{{ (ec2_instances.instances | first).tags.Workshop }}"
-      workshop_type: "{{ (ec2_instances.instances | first).tags.Workshop_type }}"
+      workshop_type: "{{ (ec2_instances.instances | last).tags.Workshop_type }}"
       student_total: "{{ (ec2_instances.instances | first).tags.Students }}"
       ec2_az: "{{ ec2_region }}a"
       ec2_subnet: "172.16.0.0/16"
@@ -45,6 +51,8 @@
       ec2_vpc_id: "{{ vpc.vpc_id }}"
 
   when:
-    - (ec2_instances.instances | first).tags.Name.startswith('tqe-gating-') 
+    - (ec2_instances.instances | first).tags.Name is defined
+    - (ec2_instances.instances | first).tags.Name.startswith('tqe-')
+    - vpc.tags.Name.endswith('-vpc') 
   any_errors_fatal: false
     

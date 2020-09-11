@@ -1,0 +1,32 @@
+-  route53_info:
+    type: A
+    query: record_sets
+    hosted_zone_id: "{{ zone_id }}"
+    start_record_name: "{{ record }}"
+    max_items: "1"
+   register: record_set
+
+#- debug:
+#    var: record_set
+
+- debug:
+    var: record
+
+#- debug:
+#    msg: "{{ record_set.ResourceRecordSets[0] }}"
+
+#- debug:
+#    msg: "{{ record_set.ResourceRecordSets[0].ResourceRecords[0].Value }}"
+
+
+- route53:
+    state: absent
+    hosted_zone_id: "{{ zone_id }}"
+    record: "{{ record }}"
+    type: A
+    value: "{{ record_set.ResourceRecordSets[0].ResourceRecords[0].Value }}"
+    ttl: "{{ record_set.ResourceRecordSets[0].TTL | default(omit) }}"
+  when:
+    - record_set.ResourceRecordSets[0].ResourceRecords is defined
+    - record + "." == record_set.ResourceRecordSets[0].Name
+  register: test

@@ -1,0 +1,60 @@
+- name: grab zone id
+  route53_zone:
+    zone: "rhdemo.io"
+  register: AWSINFO
+
+#- name: grab Route53 record information
+#  route53_info:
+#    query: record_sets
+#    hosted_zone_id: "{{ AWSINFO.zone_id }}"
+#    max_items: "20000"
+#  register: RECORDS
+
+
+
+- name: initial record_set
+  route53_info:
+    query: record_sets
+    hosted_zone_id: "{{ AWSINFO.zone_id }}"
+  # bootstrap so the upcoming "when:" will evaluate correctly
+  register: record_facts
+
+- set_fact:
+    # capture the initial answer
+    record0: '{{ record_facts.ResourceRecordSets }}'
+
+- name: rest of them
+  route53_info:
+    query: record_sets
+    hosted_zone_id: "{{ AWSINFO.zone_id }}"
+    start_record_name: '{{ record_facts.NextRecordName }}'
+  register: record_facts
+  when: 
+    - record_facts.NextRecordName | default("")
+    - record_facts.IsTruncated
+  loop: "{{ range(170)|list }}"
+
+- debug:
+    msg: "{{ record_facts.results | last }}"
+
+- set_fact:
+    all_records: >-
+      {{ record0 + (record_facts.results | 
+           selectattr("ResourceRecordSets", "defined") |
+           map(attribute="ResourceRecordSets") | list | flatten(levels=1)) }}
+
+- debug:
+    msg: "{{ all_records | length  }}"
+
+- name: List all hosted zones (check for completion)
+  fail:
+    msg: "Did not get all zones; increase loop range in task above"
+  when:
+    - (record_facts.results | last).IsTruncated is defined
+    - (record_facts.results | last).IsTruncated
+
+- name: "{{ ec2_region }} -  Render the VPCS Template"
+  template: 
+    src: "templates/records.csv.j2" 
+    dest: "{{ playbook_dir }}/reports/route53-records.txt"
+

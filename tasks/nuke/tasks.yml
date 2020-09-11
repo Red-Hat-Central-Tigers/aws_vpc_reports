@@ -9,7 +9,7 @@
   ec2_vpc_net_info:
     region: "{{ ec2_region }}"
     filters:
-      "tag:Name":  tqe-gating-*-vpc
+      "tag:Name": tqe-*
   register: vpcs2
 
 - include_tasks: tasks/nuke/vpcs.yml

@@ -1,0 +1,3 @@
+{% for vpc in vpcs.vpcs %}{% if vpc.tags.Name is defined %}
+{{ vpc.tags.Name  | default('') | replace('-vpc2', '') | replace('-vpc', '') }}
+{% endif %}{% endfor %}
